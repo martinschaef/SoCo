@@ -1,6 +1,8 @@
 import time
 import hashlib
+import os, traceback
 
+import urllib.request
 import requests
 import simplejson as json
 
@@ -17,24 +19,20 @@ app.config.from_pyfile('settings.py')
 sonos = SoCo(app.config['SPEAKER_IP'])
 
 def gen_sig():
-    return hashlib.md5(app.config['ROVI_API_KEY'] + app.config['ROVI_SHARED_SECRET'] + repr(int(time.time()))).hexdigest()
+    hash_string = "{}{}{}".format(app.config['ROVI_API_KEY'], app.config['ROVI_SHARED_SECRET'], repr(int(time.time()))).encode('utf-8')
+    return hashlib.md5(hash_string).hexdigest()
 
-def get_track_image(artist, album):
-    headers = {
-        "Accept-Encoding": "gzip"
-    }
-
-    r = requests.get('http://api.rovicorp.com/recognition/v2.1/music/match/album?apikey=' + app.config['ROVI_API_KEY'] + '&sig=' + gen_sig() + '&name= ' + album + '&performername=' + artist + '&include=images&size=1', headers=headers)
-
-    d = json.loads(r.content)
-
+def get_track_image(artist, album, image_uri):
     image = url_for('static', filename='img/blank.jpg')
-
-    if d['matchResponse']['results'] != None:
-        if d['matchResponse']['results'][0]['album']['images'] != None:
-            image = d['matchResponse']['results'][0]['album']['images'][0]['front'][3]['url']
-        else:
-            image = url_for('static', filename='img/blank.jpg')
+    # try:
+    #     img_path = os.path.join(app.root_path, "static/img/current-album-art.jpg")
+    #     urllib.request.urlretrieve(image_uri, img_path)
+    #     image = "/static/img/current-album-art.jpg"
+    # except:
+    #     traceback.print_exc()
+    #     print("Failed to parse image from ", image_uri)
+    if image_uri is not None:
+        image = image_uri
 
     return image
 
@@ -72,7 +70,7 @@ def info_light():
 def info():
     track = sonos.get_current_track_info()
 
-    track['image'] = get_track_image(track['artist'], track['album'])
+    track['image'] = get_track_image(track['artist'], track['album'], track['album_art'])
 
     return json.dumps(track)
 
@@ -80,7 +78,7 @@ def info():
 def index():
     track = sonos.get_current_track_info()
 
-    track['image'] = get_track_image(track['artist'], track['album'])
+    track['image'] = get_track_image(track['artist'], track['album'], track['album_art'])
 
     return render_template('index.html', track=track)
 

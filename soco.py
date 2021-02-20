@@ -129,7 +129,7 @@ class SoCo(object):
         """
         modes = ('NORMAL','SHUFFLE_NOREPEAT','SHUFFLE','REPEAT_ALL')
         playmode = playmode.upper()
-        if not playmode in modes: raise KeyError, "invalid play mode"
+        if not playmode in modes: raise KeyError #, "invalid play mode"
 
         action = '"urn:schemas-upnp-org:service:AVTransport:1#SetPlayMode"'
         body = '<u:SetPlayMode xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><NewPlayMode>'+playmode+'</NewPlayMode></u:SetPlayMode>'
@@ -271,7 +271,7 @@ class SoCo(object):
         """
         import re
         if not re.match(r'^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$',timestamp):
-            raise ValueError, "invalid timestamp, use HH:MM:SS format"
+            raise ValueError #, "invalid timestamp, use HH:MM:SS format"
 
         body = SEEK_TIMESTAMP_BODY_TEMPLATE.format(timestamp=timestamp)
         response = self.__send_command(TRANSPORT_ENDPOINT, SEEK_ACTION, body)
@@ -638,7 +638,6 @@ class SoCo(object):
 
         """
         response = self.__send_command(TRANSPORT_ENDPOINT, GET_CUR_TRACK_ACTION, GET_CUR_TRACK_BODY)
-
         dom = XML.fromstring(response.encode('utf-8'))
 
         track = {'title': '', 'artist': '', 'album': '', 'album_art': '',
@@ -679,20 +678,17 @@ class SoCo(object):
 
             track['title'] = ""
             if (md_title):
-                track['title'] = md_title.encode('utf-8')
+                track['title'] = md_title
                 
             track['artist'] = ""
             if (md_artist):
-                track['artist'] = md_artist.encode('utf-8')
+                track['artist'] = md_artist
 
             track['album'] = ""
             if (md_album):
-                track['album'] = md_album.encode('utf-8')
+                track['album'] = md_album
 
-            album_art = metadata.findtext('.//{urn:schemas-upnp-org:metadata-1-0/upnp/}albumArtURI')
-
-            if album_art is not None:
-                track['album_art'] = 'http://' + self.speaker_ip + ':1400' + metadata.findtext('.//{urn:schemas-upnp-org:metadata-1-0/upnp/}albumArtURI')
+            track['album_art'] = metadata.findtext('.//{urn:schemas-upnp-org:metadata-1-0/upnp/}albumArtURI')
 
         return track
 
@@ -984,7 +980,7 @@ class SoCo(object):
 
         r = requests.post('http://' + self.speaker_ip + ':1400' + endpoint, data=soap, headers=headers)
 
-        return r.content
+        return r.content.decode()
 
     def __parse_error(self, response):
         """ Parse an error returned from the Sonos speaker.
