@@ -1,10 +1,30 @@
-body {
+html {
+    overflow:hidden;
+}
+
+
+#bootstrap-overrides body {
     padding-top: 60px;
 }
 
 .row {
     margin-top: 40px;
 }
+
+h1  {
+	font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+	font-size: 300% !important;
+	font-weight: normal;
+	color: #e8e8e8 !important;
+}
+
+h2 {
+	font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+	font-size: 250% !important;
+	font-weight: normal;
+	color: #e6e6e6 !important;
+}
+
 
 /* From http://webdesignerwall.com/demo/css3-image-styles/ */
 .card .image-wrap {
